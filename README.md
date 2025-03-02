@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Code Editor
+
+A modern, intelligent code editor powered by CodeLlama AI that provides smart code suggestions, real-time assistance, and project-aware code editing capabilities.
+
+## Features
+
+- 🤖 **AI-Powered Code Assistance**: Integrated CodeLlama AI for intelligent code suggestions and real-time help
+- 📝 **Smart Code Editor**: Syntax highlighting and language detection based on file extensions
+- 🌳 **Project File Management**: Built-in file explorer with create/delete capabilities for files and folders
+- 🔄 **Multi-File Context**: AI understands your entire project structure for contextually aware suggestions
+- 💡 **Intelligent Code Analysis**: Get suggestions for improvements and refactoring across multiple files
+- 🎨 **Modern UI**: Clean and intuitive interface with split-pane views and resizable panels
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js (v18 or higher)
+- Ollama (for running CodeLlama locally)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/ai-code-editor.git
+cd ai-code-editor
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Install and run Ollama:
+- Download Ollama from [ollama.ai](https://ollama.ai)
+- Install the CodeLlama model:
+```bash
+ollama pull codellama
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Create a `.env.local` file in the root directory with these variables:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+AI_PROVIDER=ollama
+OLLAMA_API_URL=http://localhost:11434
+```
 
-## Deploy on Vercel
+## Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **File Management**:
+   - Use the sidebar to create, delete, and navigate files/folders
+   - Click on files to open them in the editor
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. **AI Assistance**:
+   - Type your questions or requests in the AI chat panel
+   - Get context-aware suggestions and code improvements
+   - Apply suggested changes directly to your files
+
+3. **Code Editing**:
+   - Edit files with syntax highlighting
+   - Multiple file support with tabs
+   - Split-pane view for side-by-side editing
+
+## Tech Stack
+
+- **Frontend**: Next.js, React, TypeScript
+- **AI**: CodeLlama (via Ollama)
+- **Styling**: Tailwind CSS
+- **Editor**: Monaco Editor
+
+## Development
+
+To contribute to the project:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- CodeLlama for providing the AI capabilities
+- Monaco Editor for the powerful code editing features
+- Next.js team for the amazing framework 
