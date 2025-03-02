@@ -1,0 +1,20 @@
+.terminal-container {
+  height: 100%;
+  background-color: #1e1e1e;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.xterm {
+  padding: 8px;
+}
+
+.xterm-viewport {
+  overflow-y: auto !important;
+}
+
+/* Import xterm.js styles directly */
+:root {
+  --xterm-default-foreground: #ffffff;
+  --xterm-default-background: #1e1e1e;
+} 

@@ -1,24 +1,24 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Import xterm.js styles */
+@import '@xterm/xterm/css/xterm.css';
+
+/* Terminal container styles */
+.terminal-container {
+  height: 100%;
+  background-color: #1e1e1e;
+  padding: 8px;
+  overflow: hidden;
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Dark mode styles */
+.dark {
+  @apply bg-[#1e1e1e] text-white;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* Light mode styles */
+.light {
+  @apply bg-white text-black;
+} 

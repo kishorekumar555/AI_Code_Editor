@@ -1,101 +1,220 @@
-import Image from "next/image";
+'use client'
+
+import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { Resizable, ResizeCallback } from 're-resizable'
+import useEditorStore from '../store/editorStore'
+import LanguageSelector from '../components/LanguageSelector'
+import Terminal from '../components/Terminal'
+import AIAssistant from '../components/AIAssistant'
+import Preview from '../components/Preview'
+import Sidebar from '../components/Sidebar'
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
+
+// Dynamically import Monaco Editor
+const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
+
+interface ResizeData {
+  width: number
+  height: number
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const {
+    code,
+    language,
+    setCode,
+    theme,
+    toggleTheme,
+    isRunning,
+    setIsRunning,
+    isDebugging,
+    setIsDebugging,
+    output,
+    clearOutput,
+  } = useEditorStore()
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const [sidebarWidth, setSidebarWidth] = useState(250)
+  const [aiPanelWidth, setAiPanelWidth] = useState(300)
+  const [previewWidth, setPreviewWidth] = useState(400)
+  const [terminalHeight, setTerminalHeight] = useState(300)
+
+  const handleRunCode = async () => {
+    setIsRunning(true)
+    clearOutput()
+    try {
+      const response = await fetch('/api/execute', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          language,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Execution failed')
+      }
+
+      // Dispatch output to terminal
+      const result = await response.json()
+      const event = new CustomEvent('terminal-output', { detail: result.output })
+      window.dispatchEvent(event)
+    } catch (error) {
+      console.error('Code execution error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to execute code'
+      const event = new CustomEvent('terminal-output', {
+        detail: `Error: ${errorMessage}\n`,
+      })
+      window.dispatchEvent(event)
+    } finally {
+      setIsRunning(false)
+    }
+  }
+
+  const handleDebug = () => {
+    setIsDebugging(!isDebugging)
+    // Add your debugging logic here
+  }
+
+  return (
+    <main className={`flex h-screen ${theme === 'dark' ? 'dark bg-[#1e1e1e] text-white' : 'light bg-white text-black'}`}>
+      <Resizable
+        size={{ width: sidebarWidth, height: '100%' }}
+        onResizeStop={(e, direction, ref, d) => setSidebarWidth(sidebarWidth + d.width)}
+        minWidth={200}
+        maxWidth={400}
+        enable={{
+          top: false,
+          right: true,
+          bottom: false,
+          left: false,
+          topRight: false,
+          bottomRight: false,
+          bottomLeft: false,
+          topLeft: false,
+        }}
+      >
+        <Sidebar />
+      </Resizable>
+
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex items-center gap-4 p-4 border-b border-gray-700">
+          <LanguageSelector />
+          <button
+            onClick={handleRunCode}
+            disabled={isRunning}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {isRunning ? 'Running...' : 'Run'}
+          </button>
+          <button
+            onClick={handleDebug}
+            className={`px-4 py-2 rounded ${
+              isDebugging
+                ? 'bg-red-600 hover:bg-red-700'
+                : 'bg-blue-600 hover:bg-blue-700'
+            } text-white`}
           >
-            Read our docs
-          </a>
+            {isDebugging ? 'Stop Debug' : 'Debug'}
+          </button>
+          <button
+            onClick={toggleTheme}
+            className="ml-auto p-2 rounded-full hover:bg-gray-700"
+          >
+            {theme === 'dark' ? (
+              <SunIcon className="w-5 h-5" />
+            ) : (
+              <MoonIcon className="w-5 h-5" />
+            )}
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <div className="flex-1 flex overflow-hidden min-h-0">
+          <div className="flex-1 min-w-0">
+            <MonacoEditor
+              height="100%"
+              language={language}
+              value={code}
+              onChange={(value) => setCode(value || '')}
+              theme={theme === 'dark' ? 'vs-dark' : 'light'}
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                lineNumbers: 'on',
+                roundedSelection: false,
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+              }}
+            />
+          </div>
+
+          {['html', 'css', 'javascript'].includes(language) && (
+            <Resizable
+              size={{ width: previewWidth, height: '100%' }}
+              onResizeStop={(e, direction, ref, d) => setPreviewWidth(previewWidth + d.width)}
+              minWidth={300}
+              maxWidth={800}
+              enable={{
+                top: false,
+                right: false,
+                bottom: false,
+                left: true,
+                topRight: false,
+                bottomRight: false,
+                bottomLeft: false,
+                topLeft: false,
+              }}
+              className={`border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
+            >
+              <Preview />
+            </Resizable>
+          )}
+
+          <Resizable
+            size={{ width: aiPanelWidth, height: '100%' }}
+            onResizeStop={(e, direction, ref, d) => setAiPanelWidth(aiPanelWidth + d.width)}
+            minWidth={200}
+            maxWidth={800}
+            enable={{
+              top: false,
+              right: false,
+              bottom: false,
+              left: true,
+              topRight: false,
+              bottomRight: false,
+              bottomLeft: false,
+              topLeft: false,
+            }}
+            className={`border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
+          >
+            <AIAssistant />
+          </Resizable>
+        </div>
+
+        <Resizable
+          size={{ width: '100%', height: terminalHeight }}
+          onResizeStop={(e, direction, ref, d) => setTerminalHeight(terminalHeight + d.height)}
+          minHeight={100}
+          maxHeight={800}
+          enable={{
+            top: true,
+            right: false,
+            bottom: false,
+            left: false,
+            topRight: false,
+            bottomRight: false,
+            bottomLeft: false,
+            topLeft: false,
+          }}
+          className="border-t border-gray-700"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
-}
+          <Terminal />
+        </Resizable>
+      </div>
+    </main>
+  )
+} 
