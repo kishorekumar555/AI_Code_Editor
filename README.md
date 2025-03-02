@@ -97,7 +97,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Monaco Editor for the powerful code editing features
 - Next.js team for the amazing framework 
 
-Demo Images
+## Demo Images
 
 
 ![AI Code Editor - Google Chrome 02-03-2025 14_17_47](https://github.com/user-attachments/assets/165f498c-aff6-4d09-ae45-afb1186c05f9)
